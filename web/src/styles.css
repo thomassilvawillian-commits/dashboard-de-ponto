@@ -4,46 +4,44 @@
 
 :root {
   color-scheme: light;
-  --page: #f2f3f5;
+  --page: #f6f7f9;
   --surface: #ffffff;
-  --surface-2: #f2f3f5;
-  --ink: #0b0b0b;
-  --ink-2: #52514e;
-  --ink-3: #6f6d68;
-  --line: #d9dce1;
-  --line-strong: #b8bdc6;
-  --brand: #1f4e79;
-  --brand-strong: #163a5c;
-  --brand-soft: #e8eef5;
+  --surface-2: #f3f5f8;
+  --ink: #2b3038;
+  --ink-2: #5b6270;
+  --ink-3: #6e7582;
+  --line: #e3e7ec;
+  --line-strong: #c9cfd8;
+  --brand: #4f7299;
+  --brand-strong: #3e5d80;
+  --brand-soft: #edf2f8;
   --on-brand: #ffffff;
-  --good: #0ca30c;
-  --good-ink: #006300;
-  --good-soft: #e3f5e3;
-  --warn: #fab219;
-  --warn-ink: #8a5a00;
-  --warn-soft: #fdf2d9;
-  --bad: #d03b3b;
-  --bad-ink: #b02a2a;
-  --bad-soft: #fbe6e6;
-  --shadow: none;
+  --good: #6aa57a;
+  --good-ink: #3d7650;
+  --good-soft: #eaf4ed;
+  --warn: #e3b75c;
+  --warn-ink: #80621f;
+  --warn-soft: #fbf4e4;
+  --bad: #b05656;
+  --bad-ink: #a44c4c;
+  --bad-soft: #f9ecec;
+  --toast: #3a4049;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --page: #0d0d0d; --surface: #1a1a19; --surface-2: #242423; --ink: #f0efec; --ink-2: #c3c2b7; --ink-3: #9a988f;
-    --line: #2c2c2a; --line-strong: #383835; --brand: #3b78b5; --brand-strong: #8db6dd; --brand-soft: #1a2a3a; --on-brand: #ffffff;
-    --good-ink: #3cc23c; --good-soft: #142a14; --warn-ink: #fab219; --warn-soft: #2e2512; --bad-ink: #ef7c7c; --bad-soft: #321818;
-   
-    --shadow: none;
+    --page: #16181c; --surface: #1e2126; --surface-2: #262a30; --ink: #e6e8eb; --ink-2: #b4bac3; --ink-3: #959ca7;
+    --line: #30353c; --line-strong: #3d434b; --brand: #7d9ec4; --brand-strong: #a9c2de; --brand-soft: #243245; --on-brand: #16181c;
+    --good: #6fae80; --good-ink: #8cc79c; --good-soft: #1f2e24; --warn: #d9b46a; --warn-ink: #e0c079; --warn-soft: #322b1c;
+    --bad: #c97a7a; --bad-ink: #e3a0a0; --bad-soft: #352223; --toast: #3a4049;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --page: #0d0d0d; --surface: #1a1a19; --surface-2: #242423; --ink: #f0efec; --ink-2: #c3c2b7; --ink-3: #9a988f;
-  --line: #2c2c2a; --line-strong: #383835; --brand: #3b78b5; --brand-strong: #8db6dd; --brand-soft: #1a2a3a; --on-brand: #ffffff;
-  --good-ink: #3cc23c; --good-soft: #142a14; --warn-ink: #fab219; --warn-soft: #2e2512; --bad-ink: #ef7c7c; --bad-soft: #321818;
- 
-  --shadow: none;
+  --page: #16181c; --surface: #1e2126; --surface-2: #262a30; --ink: #e6e8eb; --ink-2: #b4bac3; --ink-3: #959ca7;
+  --line: #30353c; --line-strong: #3d434b; --brand: #7d9ec4; --brand-strong: #a9c2de; --brand-soft: #243245; --on-brand: #16181c;
+  --good: #6fae80; --good-ink: #8cc79c; --good-soft: #1f2e24; --warn: #d9b46a; --warn-ink: #e0c079; --warn-soft: #322b1c;
+  --bad: #c97a7a; --bad-ink: #e3a0a0; --bad-soft: #352223; --toast: #3a4049;
 }
 
 @theme inline {

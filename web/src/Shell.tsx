@@ -23,7 +23,7 @@ function Item({ to, children, badge, end }: { to: string; children: ReactNode; b
       className={({ isActive }) => cx('flex items-center border-l-[3px] px-3 py-1.5 text-sm',
         isActive ? 'border-brand bg-brand-soft font-semibold text-brand-strong' : 'border-transparent text-ink-2 hover:bg-surface-2 hover:text-ink')}>
       <span className="flex-1">{children}</span>
-      {!!badge && <span className="rounded-sm bg-bad px-1.5 text-[11px] font-semibold leading-5 text-white">{badge}</span>}
+      {!!badge && <span className="rounded-sm bg-bad-ink px-1.5 text-[11px] font-semibold leading-5 text-surface">{badge}</span>}
     </NavLink>
   );
 }

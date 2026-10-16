@@ -10,7 +10,7 @@ export function Button({ variant = 'secondary', size = 'md', loading, className,
     primary: 'bg-brand text-on-brand hover:bg-brand-strong border-transparent',
     secondary: 'bg-surface text-ink border-line hover:bg-surface-2',
     ghost: 'bg-transparent text-ink-2 border-transparent hover:bg-surface-2 hover:text-ink',
-    danger: 'bg-bad text-white border-transparent hover:opacity-90',
+    danger: 'bg-bad-ink text-surface border-transparent hover:opacity-90',
   }[variant];
   const s = { sm: 'h-8 px-3 text-[13px] gap-1.5', md: 'h-10 px-4 text-sm gap-2', lg: 'h-12 px-5 text-base gap-2' }[size];
   return (
@@ -131,7 +131,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       <div className="no-print pointer-events-none fixed inset-x-0 bottom-4 z-50 flex flex-col items-center gap-2 px-4" aria-live="polite">
         {items.map((t) => (
-          <div key={t.id} className={cx('pointer-events-auto max-w-md rounded px-4 py-2.5 text-sm text-white', t.tone === 'bad' ? 'bg-bad-ink' : 'bg-[#2b2f36]')}>
+          <div key={t.id} className={cx('pointer-events-auto max-w-md rounded px-4 py-2.5 text-sm', t.tone === 'bad' ? 'border border-bad/40 bg-bad-soft text-bad-ink' : 'bg-[var(--toast)] text-white')}>
             {t.text}
           </div>
         ))}

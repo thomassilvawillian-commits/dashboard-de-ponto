@@ -1,17 +1,29 @@
 # Controle de Ponto
 
-Plataforma web para registro de jornada, espelho de ponto e banco de horas. Funciona no computador e no celular, tem um painel simples para o RH e guarda os dados num banco próprio (PostgreSQL), sem depender de planilhas no Google Drive.
+Sistema web gratuito para registro de ponto, espelho mensal e banco de horas. Funciona sozinho, sem planilha no Google Drive: basta abrir o link, entrar com usuário e senha e registrar. Foi pensado para ser simples de usar por qualquer pessoa, no computador ou no celular, com visual limpo, cores suaves e tema claro ou escuro.
 
 **Software criado por Willian Thomas.**
 
 > A versão anterior, em Google Apps Script e Planilhas, está preservada em [`legacy/`](legacy/). Os cadastros e marcações dela podem ser importados (veja [Migrar da versão em planilha](#migrar-da-versão-em-planilha)).
 
+## Telas
+
+| Registro de ponto | Painel do RH |
+| --- | --- |
+| ![Tela de registro de ponto](docs/telas/registro-de-ponto.png) | ![Painel do RH com a situação da equipe](docs/telas/painel.png) |
+
+| Justificativa de falta | No celular |
+| --- | --- |
+| ![Espelho com a janela de justificar falta](docs/telas/justificar-falta.png) | <img src="docs/telas/celular.png" alt="Registro de ponto no celular" width="260"> |
+
+As telas acima usam os dados de demonstração (veja [Executar no seu computador](#executar-no-seu-computador)).
+
 ## O que o sistema faz
 
 ### Para o colaborador
 
-- Registro de ponto com um toque, usando o relógio do servidor, com proteção contra toque duplo.
-- Linha do tempo do dia, horas trabalhadas, progresso da jornada e saldo do banco de horas.
+- Registro de ponto com um botão que diz a ação ("Registrar entrada", "Registrar saída"), usando o relógio do servidor e com proteção contra clique duplo.
+- Marcações do dia, horas trabalhadas, jornada prevista e saldo do banco de horas.
 - Espelho de ponto mensal com marcações, previsto, trabalhado e saldo de cada dia.
 - Solicitação de ajuste: incluir um horário esquecido ou desconsiderar uma marcação errada, com motivo.
 - **Justificativa de falta sem depender do RH:** no espelho, o próprio colaborador justifica a falta (atestado, consulta, motivo pessoal, folga combinada ou licença). O dia é abonado na hora; o RH vê todas as justificativas em *Feriados e ausências* e pode removê-las.
@@ -35,7 +47,7 @@ Plataforma web para registro de jornada, espelho de ponto e banco de horas. Func
 
 | Perfil | Pode |
 | --- | --- |
-| Colaborador | Registrar ponto, ver o próprio espelho e solicitar ajustes. |
+| Colaborador | Registrar ponto, ver o próprio espelho, justificar faltas e solicitar ajustes de horário. |
 | Gestor | Tudo do colaborador, mais painel, espelhos da equipe, aprovações, correções de marcação, ausências e relatórios. |
 | Administrador | Tudo do gestor, mais cadastros, jornadas, feriados, banco de horas e configurações. |
 
@@ -142,6 +154,7 @@ server/            API, regras de apuração e banco de dados
   src/scripts/     importação da planilha e dados de demonstração
   test/            testes de cálculo e da API
 web/               interface React
+docs/telas/        capturas de tela usadas neste README
 legacy/            versão 1 em Google Apps Script
 ```
 
