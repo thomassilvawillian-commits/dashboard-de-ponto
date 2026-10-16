@@ -1,4 +1,3 @@
-import { CalendarRange, FileSpreadsheet, Printer, Users } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { downloadUrl, fmtMonth } from '../../format';
@@ -23,21 +22,20 @@ export default function Reports() {
         </div>
       </Card>
       <div className="grid gap-4 md:grid-cols-3">
-        <ReportCard icon={<Users />} title="Resumo mensal" text={`Uma linha por colaborador com horas, extras, faltas, saldo e banco de ${fmtMonth(month)}.`}
-          action={<Button variant="primary" onClick={() => downloadUrl(`/admin/reports/summary.csv?m=${month}${ids}`)}><FileSpreadsheet className="size-4" />Baixar CSV</Button>} />
-        <ReportCard icon={<CalendarRange />} title="Espelho de ponto" text="Todas as marcações e o resultado de cada dia, prontos para conferência e arquivo."
-          action={<Button variant="primary" onClick={() => downloadUrl(`/admin/reports/timesheet.csv?m=${month}${ids}`)}><FileSpreadsheet className="size-4" />Baixar CSV</Button>} />
-        <ReportCard icon={<Printer />} title="Espelho para assinatura" text="Versão para imprimir ou salvar em PDF, com campos de assinatura do colaborador e do RH."
-          action={<Button disabled={!userId} onClick={() => nav(`/gestao/colaboradores/${userId}?m=${month}`)}><Printer className="size-4" />{userId ? 'Abrir e imprimir' : 'Escolha um colaborador'}</Button>} />
+        <ReportCard title="Resumo mensal" text={`Uma linha por colaborador com horas, extras, faltas, saldo e banco de ${fmtMonth(month)}.`}
+          action={<Button variant="primary" onClick={() => downloadUrl(`/admin/reports/summary.csv?m=${month}${ids}`)}>Baixar CSV</Button>} />
+        <ReportCard title="Espelho de ponto" text="Todas as marcações e o resultado de cada dia, prontos para conferência e arquivo."
+          action={<Button variant="primary" onClick={() => downloadUrl(`/admin/reports/timesheet.csv?m=${month}${ids}`)}>Baixar CSV</Button>} />
+        <ReportCard title="Espelho para assinatura" text="Versão para imprimir ou salvar em PDF, com campos de assinatura do colaborador e do RH."
+          action={<Button disabled={!userId} onClick={() => nav(`/gestao/colaboradores/${userId}?m=${month}`)}>{userId ? 'Abrir e imprimir' : 'Escolha um colaborador'}</Button>} />
       </div>
     </>
   );
 }
 
-function ReportCard({ icon, title, text, action }: { icon: React.ReactNode; title: string; text: string; action: React.ReactNode }) {
+function ReportCard({ title, text, action }: { title: string; text: string; action: React.ReactNode }) {
   return (
-    <div className="card flex flex-col gap-3 p-5">
-      <div className="grid size-10 place-items-center rounded-xl bg-brand-soft text-brand-strong [&>svg]:size-5">{icon}</div>
+    <div className="card flex flex-col gap-2 p-4">
       <h2 className="font-semibold">{title}</h2>
       <p className="flex-1 text-sm text-ink-2">{text}</p>
       <div>{action}</div>

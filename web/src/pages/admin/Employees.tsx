@@ -1,4 +1,4 @@
-import { Copy, Plus, Search, UserPlus, Users } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { get, patch, post } from '../../api';
@@ -17,7 +17,7 @@ export function TempPasswordModal({ value, name, onClose }: { value: string | nu
       <p className="text-sm text-ink-2">Entregue esta senha a {name || 'o colaborador'}. Ela vale para o primeiro acesso, quando será pedida uma senha pessoal.</p>
       <div className="mt-4 flex items-center gap-2 rounded-xl bg-surface-2 p-4">
         <code className="flex-1 text-center text-2xl font-semibold tracking-widest">{value}</code>
-        <Button size="sm" onClick={() => { navigator.clipboard?.writeText(value || ''); toast('Senha copiada.'); }}><Copy className="size-4" />Copiar</Button>
+        <Button size="sm" onClick={() => { navigator.clipboard?.writeText(value || ''); toast('Senha copiada.'); }}>Copiar</Button>
       </div>
       <p className="mt-3 text-xs text-ink-3">Por segurança, a senha não poderá ser vista novamente. Se perder, gere outra.</p>
     </Modal>
@@ -131,15 +131,15 @@ export default function Employees() {
   return (
     <>
       <PageHeader title="Colaboradores" subtitle="Cadastros, perfis de acesso e jornadas."
-        actions={admin && <Button variant="primary" onClick={() => setFormOpen(true)}><UserPlus className="size-4" />Novo colaborador</Button>} />
+        actions={admin && <Button variant="primary" onClick={() => setFormOpen(true)}>Novo colaborador</Button>} />
       <ErrorBox error={error} />
       <Card pad={false} title={`${rows.length} colaborador(es)`} actions={<>
         <div className="relative"><Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-ink-3" /><Input className="h-9 w-56 pl-8" placeholder="Buscar" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Buscar" /></div>
         <Select className="h-9 w-auto" value={show} onChange={(e) => setShow(e.target.value)} aria-label="Situação"><option value="ativos">Ativos</option><option value="inativos">Inativos</option><option value="todos">Todos</option></Select>
       </>}>
         {loading && !data ? <Spinner /> : !rows.length ? (
-          <Empty icon={<Users className="size-8" />} title="Nenhum colaborador encontrado">
-            {admin && <Button className="mt-3" variant="primary" onClick={() => setFormOpen(true)}><Plus className="size-4" />Cadastrar o primeiro</Button>}
+          <Empty title="Nenhum colaborador encontrado">
+            {admin && <Button className="mt-3" variant="primary" onClick={() => setFormOpen(true)}>Cadastrar o primeiro</Button>}
           </Empty>
         ) : (
           <div className="overflow-x-auto">

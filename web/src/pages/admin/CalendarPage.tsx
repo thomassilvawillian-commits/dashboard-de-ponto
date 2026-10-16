@@ -1,4 +1,4 @@
-import { CalendarHeart, Flag, Plane, Plus, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { del, get, post } from '../../api';
 import { useAuth } from '../../auth';
@@ -7,7 +7,7 @@ import { Badge, Button, Card, Empty, ErrorBox, Field, Input, Modal, PageHeader, 
 import { UserSelect, useUsers } from '../../ui/UserSelect';
 
 interface Holiday { id: number; date: string; name: string }
-interface Absence { id: number; userId: number; userName: string; startDate: string; endDate: string; type: string; note: string | null }
+interface Absence { id: number; userId: number; userName: string; startDate: string; endDate: string; type: string; note: string | null; selfJustified: boolean }
 
 export default function CalendarPage() {
   const toast = useToast();
@@ -33,13 +33,13 @@ export default function CalendarPage() {
           {[year - 1, year, year + 1].map((y) => <option key={y} value={y}>{y}</option>)}
         </Select>} />
       <div className="grid gap-6 xl:grid-cols-2">
-        <Card title={<span className="flex items-center gap-2"><Flag className="size-4 text-brand" />Feriados de {year}</span>}
+        <Card title={`Feriados de ${year}`}
           actions={admin && <>
             <Button size="sm" onClick={() => act(() => post('/admin/holidays/national', { year }), 'Feriados nacionais adicionados.', hol.reload)}>Importar nacionais</Button>
-            <Button size="sm" variant="primary" onClick={() => { setError(null); setHForm({ date: `${year}-01-01`, name: '' }); }}><Plus className="size-4" />Adicionar</Button>
+            <Button size="sm" variant="primary" onClick={() => { setError(null); setHForm({ date: `${year}-01-01`, name: '' }); }}>Adicionar</Button>
           </>} pad={false}>
           {hol.loading && !hol.data ? <Spinner /> : !hol.data?.holidays.length ? (
-            <Empty icon={<CalendarHeart className="size-8" />} title="Nenhum feriado cadastrado">Importe os feriados nacionais e inclua os estaduais e municipais da sua cidade.</Empty>
+            <Empty title="Nenhum feriado cadastrado">Importe os feriados nacionais e inclua os estaduais e municipais da sua cidade.</Empty>
           ) : (
             <ul>{hol.data.holidays.map((h) => (
               <li key={h.id} className="flex items-center gap-3 border-b border-line px-5 py-2.5 last:border-0">
@@ -51,16 +51,17 @@ export default function CalendarPage() {
           )}
         </Card>
 
-        <Card title={<span className="flex items-center gap-2"><Plane className="size-4 text-brand" />Ausências</span>}
-          actions={<Button size="sm" variant="primary" onClick={() => { setError(null); setAForm({ userId: '', startDate: new Date().toISOString().slice(0, 10), endDate: new Date().toISOString().slice(0, 10), type: 'FERIAS', note: '' }); }}><Plus className="size-4" />Registrar</Button>} pad={false}>
+        <Card title="Ausências e justificativas"
+          actions={<Button size="sm" variant="primary" onClick={() => { setError(null); setAForm({ userId: '', startDate: new Date().toISOString().slice(0, 10), endDate: new Date().toISOString().slice(0, 10), type: 'FERIAS', note: '' }); }}>Registrar</Button>} pad={false}>
           {abs.loading && !abs.data ? <Spinner /> : !abs.data?.absences.length ? (
-            <Empty icon={<Plane className="size-8" />} title="Nenhuma ausência registrada">Férias, atestados e folgas registrados aqui não geram falta no espelho.</Empty>
+            <Empty title="Nenhuma ausência registrada">Férias, atestados e folgas registrados aqui não geram falta no espelho.</Empty>
           ) : (
             <ul>{abs.data.absences.map((a) => (
               <li key={a.id} className="flex items-center gap-3 border-b border-line px-5 py-3 last:border-0">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium">{a.userName}</p>
                   <p className="text-xs text-ink-2 tabular">{fmtDate(a.startDate)}{a.endDate !== a.startDate ? ` a ${fmtDate(a.endDate)}` : ''}{a.note ? ` · ${a.note}` : ''}</p>
+                  {a.selfJustified && <p className="text-xs text-ink-3">Justificada pelo colaborador</p>}
                 </div>
                 <Badge tone={abs.data!.types[a.type]?.abona === false ? 'warn' : 'brand'}>{abs.data!.types[a.type]?.label || a.type}</Badge>
                 <button className="rounded-md p-1.5 text-ink-3 hover:bg-bad-soft hover:text-bad-ink" aria-label="Remover ausência" onClick={() => act(() => del(`/admin/absences/${a.id}`), 'Ausência removida.', abs.reload)}><Trash2 className="size-4" /></button>

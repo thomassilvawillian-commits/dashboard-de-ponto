@@ -1,4 +1,3 @@
-import { Check, CheckSquare, X } from 'lucide-react';
 import { useState } from 'react';
 import { get, post } from '../../api';
 import { fmtDate, fmtDateTime } from '../../format';
@@ -31,7 +30,7 @@ export default function Approvals() {
       <ErrorBox error={error} />
       <Card pad={false}>
         {loading && !data ? <Spinner /> : !data?.requests.length ? (
-          <Empty icon={<CheckSquare className="size-8" />} title={status === 'PENDENTE' ? 'Tudo em dia' : 'Nenhuma solicitação'}>{status === 'PENDENTE' && 'Não há ajustes aguardando aprovação.'}</Empty>
+          <Empty title={status === 'PENDENTE' ? 'Nenhum ajuste pendente' : 'Nenhuma solicitação'}>{status === 'PENDENTE' && 'Não há ajustes aguardando aprovação.'}</Empty>
         ) : (
           <ul>
             {data.requests.map((r) => (
@@ -44,8 +43,8 @@ export default function Approvals() {
                 {r.status === 'PENDENTE' ? (
                   <div className="flex flex-wrap items-center gap-2">
                     <Input className="h-9 w-56" placeholder="Observação (opcional)" value={notes[r.id] || ''} onChange={(e) => setNotes({ ...notes, [r.id]: e.target.value })} aria-label="Observação" />
-                    <Button size="sm" onClick={() => decide(r, 'reject')} disabled={busy === r.id}><X className="size-4" />Recusar</Button>
-                    <Button size="sm" variant="primary" onClick={() => decide(r, 'approve')} loading={busy === r.id}><Check className="size-4" />Aprovar</Button>
+                    <Button size="sm" onClick={() => decide(r, 'reject')} disabled={busy === r.id}>Recusar</Button>
+                    <Button size="sm" variant="primary" onClick={() => decide(r, 'approve')} loading={busy === r.id}>Aprovar</Button>
                   </div>
                 ) : <Badge tone={REQUEST_STATUS[r.status].tone}>{REQUEST_STATUS[r.status].label}</Badge>}
               </li>

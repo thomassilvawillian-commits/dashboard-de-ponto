@@ -91,11 +91,11 @@ opsRouter.get('/absences', async (req, res) => {
   if (req.query.from) { params.push(String(req.query.from)); where.push(`a.end_date >= $${params.length}`); }
   if (req.query.to) { params.push(String(req.query.to)); where.push(`a.start_date <= $${params.length}`); }
   const rows = await req.db.query(
-    `select a.id, a.user_id, u.name as user_name, a.start_date, a.end_date, a.type, a.note, a.created_at
+    `select a.id, a.user_id, u.name as user_name, a.start_date, a.end_date, a.type, a.note, a.created_at, a.created_by = a.user_id as self_justified
        from absences a join users u on u.id = a.user_id ${where.length ? 'where ' + where.join(' and ') : ''}
       order by a.start_date desc limit 500`, params);
   res.json({
-    absences: rows.map((a) => ({ id: a.id, userId: a.user_id, userName: a.user_name, startDate: a.start_date, endDate: a.end_date, type: a.type, note: a.note })),
+    absences: rows.map((a) => ({ id: a.id, userId: a.user_id, userName: a.user_name, startDate: a.start_date, endDate: a.end_date, type: a.type, note: a.note, selfJustified: a.self_justified })),
     types: ABSENCE_TYPES,
   });
 });

@@ -48,26 +48,15 @@ insightsRouter.get('/overview', async (req, res) => {
 
   const tracked = team.filter((t) => t.active && t.trackTime);
   const sum = (f: (t: (typeof team)[number]) => number) => tracked.reduce((acc, t) => acc + f(t), 0);
-  const series = (months.size ? [...months.values()][0].days : []).map((d, i) => {
-    let worked = 0, expected = 0;
-    for (const t of tracked) { const day = months.get(t.id)!.days[i]; worked += day.workedMin; expected += day.expectedMin; }
-    return { date: d.date, workedMin: worked, expectedMin: expected };
-  });
   const presenceCount: Record<string, number> = {};
   for (const t of tracked) presenceCount[t.today.presence] = (presenceCount[t.today.presence] || 0) + 1;
 
   res.json({
     month: m, today: ctx.today, now: ctx.now.toISOString(),
     kpis: {
-      people: tracked.length,
-      workedMin: sum((t) => t.month.workedMin), expectedMin: sum((t) => t.month.expectedMin),
-      extraMin: sum((t) => t.month.extraMin), missingMin: sum((t) => t.month.missingMin),
-      balanceMin: sum((t) => t.month.balanceMin), bankMin: sum((t) => t.month.bankMin),
-      absences: sum((t) => t.month.absences), lateMin: sum((t) => t.month.lateMin), lateDays: sum((t) => t.month.lateDays),
-      pendingDays: sum((t) => t.month.pending), alerts: sum((t) => t.alerts.length), pendingRequests: pending[0].n,
+      people: tracked.length, absences: sum((t) => t.month.absences), pendingDays: sum((t) => t.month.pending), pendingRequests: pending[0].n,
     },
     presence: presenceCount,
-    series,
     team,
   });
 });
@@ -140,17 +129,6 @@ insightsRouter.get('/reports/timesheet.csv', async (req, res) => {
   res.send(csv(rows));
 });
 
-/* Auditoria */
-insightsRouter.get('/audit', requireRole('ADMIN'), async (req, res) => {
-  const limit = Math.min(200, Math.max(1, Number(req.query.limit) || 100));
-  const before = Number(req.query.before) || null;
-  const rows = await req.db.query(
-    `select a.id, a.action, a.entity, a.entity_id, a.data, a.created_at, u.name as actor
-       from audit_log a left join users u on u.id = a.actor_id
-      where ($1::bigint is null or a.id < $1) order by a.id desc limit $2`, [before, limit]);
-  res.json({ entries: rows });
-});
-
 /* Configurações */
 insightsRouter.get('/settings', async (req, res) => {
   res.json({ settings: await getSettings(req.db), defaults: DEFAULT_SETTINGS });
@@ -162,10 +140,7 @@ insightsRouter.put('/settings', requireRole('ADMIN'), async (req, res) => {
     timezone: z.string().refine(isValidTimeZone, 'Fuso horário inválido.'),
     toleranceDailyMin: z.number().int().min(0).max(60),
     toleranceLateMin: z.number().int().min(0).max(120),
-    minPunchIntervalMin: z.number().int().min(0).max(60),
     autoApproveRequests: z.boolean(),
-    requestGeolocation: z.boolean(),
-    allowedNetworks: z.string().trim().max(500),
   }).partial(), req.body);
   await saveSettings(req.db, body);
   await audit(req.db, req.user!.id, 'settings.update', 'settings', null, body);

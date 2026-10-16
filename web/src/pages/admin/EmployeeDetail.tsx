@@ -1,9 +1,8 @@
-import { ArrowLeft, CalendarPlus, KeyRound, Pencil, Plus, Printer, Trash2 } from 'lucide-react';
+import { ArrowLeft, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 import { del, get, post } from '../../api';
 import { useAuth } from '../../auth';
-import { BalanceChart } from '../../charts/BalanceChart';
 import { ALERTS, ROLE_LABEL, SOURCE_LABEL, WEEKDAYS_LONG, fmtDate, fmtMin, fmtMonth, punchLabel } from '../../format';
 import type { Day, MonthSummary, Schedule, User } from '../../types';
 import { Badge, Button, Card, ErrorBox, Field, Input, Modal, PageHeader, Spinner, cx, useLoad, useToast } from '../../ui';
@@ -66,7 +65,7 @@ function DayModal({ day, userId, onClose, onChanged }: { day: Day | null; userId
                 <Field label="Horário">{(id) => <Input id={id} type="time" value={time} onChange={(e) => setTime(e.target.value)} />}</Field>
                 <Field label="Motivo">{(id) => <Input id={id} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Ex.: esqueceu de registrar" />}</Field>
               </div>
-              <Button variant="primary" loading={busy} disabled={!time} onClick={() => run(() => post(`/admin/users/${userId}/punches`, { date: day.date, time, note }), 'Marcação incluída.')}><Plus className="size-4" />Incluir</Button>
+              <Button variant="primary" loading={busy} disabled={!time} onClick={() => run(() => post(`/admin/users/${userId}/punches`, { date: day.date, time, note }), 'Marcação incluída.')}>Incluir</Button>
             </div>
           )}
           <ErrorBox error={error} />
@@ -101,7 +100,7 @@ function SchedulesCard({ userId, admin }: { userId: number; admin: boolean }) {
   }
 
   return (
-    <Card title="Jornadas" actions={admin && <Button size="sm" onClick={startNew}><CalendarPlus className="size-4" />Nova vigência</Button>}>
+    <Card title="Jornadas" actions={admin && <Button size="sm" onClick={startNew}>Nova vigência</Button>}>
       <p className="mb-3 text-xs text-ink-3">Cada jornada vale a partir da data indicada. Mudanças não alteram o cálculo de dias anteriores.</p>
       <ul className="flex flex-col gap-2">
         {data?.schedules.map((s, i) => (
@@ -152,19 +151,16 @@ export default function EmployeeDetail() {
         subtitle={u && <span>{[u.jobTitle, u.department, u.registration && `Matrícula ${u.registration}`, ROLE_LABEL[u.role]].filter(Boolean).join(' · ')} · espelho de {fmtMonth(month)}</span>}
         actions={<>
           <MonthPicker value={month} onChange={(m) => setParams({ m })} max={data?.today.slice(0, 7)} />
-          <Button onClick={() => print()}><Printer className="size-4" />Imprimir</Button>
-          {admin && <Button onClick={() => setEdit(true)}><Pencil className="size-4" />Editar</Button>}
-          {admin && <Button onClick={resetPassword}><KeyRound className="size-4" />Senha temporária</Button>}
+          <Button onClick={() => print()}>Imprimir</Button>
+          {admin && <Button onClick={() => setEdit(true)}>Editar</Button>}
+          {admin && <Button onClick={resetPassword}>Senha temporária</Button>}
         </>} />
       <ErrorBox error={error} />
       {loading && !data ? <Spinner /> : data && (
         <div className="flex flex-col gap-6">
           {!data.user.active && <ErrorBox error="Este colaborador está inativo e não consegue entrar no sistema." />}
           <SummaryStats s={data.summary} />
-          <div className="grid gap-6 xl:grid-cols-3">
-            <Card title="Saldo diário" className="no-print xl:col-span-2"><BalanceChart days={data.summary.days} /></Card>
-            <div className="no-print"><SchedulesCard userId={userId} admin={admin} /></div>
-          </div>
+          <div className="no-print max-w-2xl"><SchedulesCard userId={userId} admin={admin} /></div>
           <Card title="Espelho de ponto" pad={false} actions={<span className="no-print text-xs text-ink-3">Clique em um dia para incluir ou desconsiderar marcações</span>}>
             <DayTable days={data.summary.days} today={data.today} onDayClick={(d) => d.status !== 'futuro' && setDay(d)} />
           </Card>

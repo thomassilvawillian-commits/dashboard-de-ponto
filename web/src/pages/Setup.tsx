@@ -1,4 +1,3 @@
-import { Rocket } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { post } from '../api';
 import { useAuth } from '../auth';
@@ -40,7 +39,7 @@ export default function Setup() {
   }
 
   return (
-    <AuthLayout wide title="Bem-vindo ao Controle de Ponto" subtitle="Configure a empresa e crie a conta de administrador. Leva menos de um minuto.">
+    <AuthLayout wide title="Configuração inicial" subtitle="Informe os dados da empresa e crie a conta do administrador.">
       <form onSubmit={submit} className="flex flex-col gap-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Nome da empresa">{(id) => <Input id={id} value={f.companyName} onChange={set('companyName')} required autoFocus />}</Field>
@@ -54,7 +53,7 @@ export default function Setup() {
           <Field label="Confirme a senha">{(id) => <Input id={id} type="password" value={f.confirm} onChange={set('confirm')} autoComplete="new-password" required />}</Field>
         </div>
         <ErrorBox error={error} />
-        <Button variant="primary" size="lg" loading={busy} type="submit"><Rocket className="size-4" />Começar</Button>
+        <Button variant="primary" size="lg" loading={busy} type="submit">Salvar e entrar</Button>
       </form>
     </AuthLayout>
   );

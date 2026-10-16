@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, Info, Loader2, X, XCircle } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ');
@@ -43,30 +43,30 @@ export function Card({ title, actions, children, className, pad = true }: { titl
   return (
     <section className={cx('card', className)}>
       {(title || actions) && (
-        <header className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-5 py-3.5">
-          <h2 className="text-[15px] font-semibold">{title}</h2>
+        <header className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-surface-2/60 px-4 py-2.5">
+          <h2 className="text-sm font-semibold">{title}</h2>
           {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
         </header>
       )}
-      <div className={pad ? 'p-5' : ''}>{children}</div>
+      <div className={pad ? 'p-4' : ''}>{children}</div>
     </section>
   );
 }
 
 export type Tone = 'good' | 'warn' | 'bad' | 'brand' | 'muted';
-export function Badge({ tone = 'muted', children, icon }: { tone?: Tone; children: ReactNode; icon?: ReactNode }) {
+export function Badge({ tone = 'muted', children }: { tone?: Tone; children: ReactNode }) {
   const t = {
     good: 'bg-good-soft text-good-ink', warn: 'bg-warn-soft text-warn-ink', bad: 'bg-bad-soft text-bad-ink',
     brand: 'bg-brand-soft text-brand-strong', muted: 'bg-surface-2 text-ink-2',
   }[tone];
-  return <span className={cx('inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap', t)}>{icon}{children}</span>;
+  return <span className={cx('inline-block rounded-sm px-1.5 py-px text-xs font-medium whitespace-nowrap', t)}>{children}</span>;
 }
 
-export function Stat({ label, value, sub, tone, icon }: { label: string; value: ReactNode; sub?: ReactNode; tone?: 'good' | 'bad'; icon?: ReactNode }) {
+export function Stat({ label, value, sub, tone }: { label: string; value: ReactNode; sub?: ReactNode; tone?: 'good' | 'bad' }) {
   return (
     <div className="card flex flex-col gap-1 p-4">
-      <div className="flex items-center gap-2 text-[13px] text-ink-2">{icon}{label}</div>
-      <div className={cx('text-2xl font-semibold tracking-tight', tone === 'good' && 'text-good-ink', tone === 'bad' && 'text-bad-ink')}>{value}</div>
+      <div className="text-[13px] text-ink-2">{label}</div>
+      <div className={cx('text-2xl font-semibold', tone === 'good' && 'text-good-ink', tone === 'bad' && 'text-bad-ink')}>{value}</div>
       {sub && <div className="text-xs text-ink-3">{sub}</div>}
     </div>
   );
@@ -76,10 +76,9 @@ export function Spinner({ label = 'Carregando…' }: { label?: string }) {
   return <div className="flex items-center justify-center gap-2 p-10 text-sm text-ink-3"><Loader2 className="size-4 animate-spin" />{label}</div>;
 }
 
-export function Empty({ icon, title, children }: { icon?: ReactNode; title: string; children?: ReactNode }) {
+export function Empty({ title, children }: { title: string; children?: ReactNode }) {
   return (
     <div className="flex flex-col items-center gap-2 px-6 py-12 text-center">
-      {icon && <div className="text-ink-3">{icon}</div>}
       <p className="font-medium">{title}</p>
       {children && <div className="max-w-sm text-sm text-ink-3">{children}</div>}
     </div>
@@ -88,7 +87,7 @@ export function Empty({ icon, title, children }: { icon?: ReactNode; title: stri
 
 export function ErrorBox({ error }: { error: string | null | undefined }) {
   if (!error) return null;
-  return <div role="alert" className="flex items-start gap-2 rounded-lg bg-bad-soft px-3 py-2.5 text-sm text-bad-ink"><XCircle className="mt-0.5 size-4 shrink-0" />{error}</div>;
+  return <div role="alert" className="rounded border border-bad/40 bg-bad-soft px-3 py-2 text-sm text-bad-ink">{error}</div>;
 }
 
 export function Modal({ open, onClose, title, children, footer, wide }: { open: boolean; onClose: () => void; title: string; children: ReactNode; footer?: ReactNode; wide?: boolean }) {
@@ -132,8 +131,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       <div className="no-print pointer-events-none fixed inset-x-0 bottom-4 z-50 flex flex-col items-center gap-2 px-4" aria-live="polite">
         {items.map((t) => (
-          <div key={t.id} className="card pointer-events-auto flex max-w-md items-center gap-2 px-4 py-3 text-sm">
-            {t.tone === 'good' ? <CheckCircle2 className="size-4 text-good" /> : t.tone === 'bad' ? <AlertTriangle className="size-4 text-bad" /> : <Info className="size-4 text-brand" />}
+          <div key={t.id} className={cx('pointer-events-auto max-w-md rounded px-4 py-2.5 text-sm text-white', t.tone === 'bad' ? 'bg-bad-ink' : 'bg-[#2b2f36]')}>
             {t.text}
           </div>
         ))}
@@ -162,9 +160,9 @@ export function useLoad<T>(fn: () => Promise<T>, deps: unknown[]) {
 
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: ReactNode; actions?: ReactNode }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+    <div className="mb-5 flex flex-wrap items-end justify-between gap-3 border-b border-line pb-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <h1 className="text-xl font-semibold">{title}</h1>
         {subtitle && <p className="mt-1 text-sm text-ink-2">{subtitle}</p>}
       </div>
       {actions && <div className="no-print flex flex-wrap items-center gap-2">{actions}</div>}

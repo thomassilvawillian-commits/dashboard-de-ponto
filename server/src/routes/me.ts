@@ -3,10 +3,9 @@ import { z } from 'zod';
 import { requireAuth } from '../auth/session.js';
 import { punchLabel } from '../domain/calc.js';
 import { isValidDate, isValidMonth, ymdIn, zonedToUtc } from '../domain/time.js';
-import { HttpError, badRequest, clientIp, notFound, parse } from '../http.js';
+import { HttpError, badRequest, notFound, parse } from '../http.js';
 import { audit } from '../services/audit.js';
 import { applyRequest, assertPunchAllowed, insertPunch, requestDto } from '../services/requests.js';
-import { ipAllowed } from '../services/settings.js';
 import { loadContext, monthFor, todayFor } from '../services/timesheet.js';
 import { currentSchedule } from '../services/users.js';
 
@@ -28,30 +27,19 @@ meRouter.get('/today', async (req, res) => {
     now: ctx.now.toISOString(), today: ctx.today, timezone: ctx.tz,
     day: t.day, bankMin: t.bank.balanceMin, schedule,
     next: { index: n, label: punchLabel(n), isEntry: n % 2 === 0 },
-    requestGeolocation: ctx.settings.requestGeolocation,
   });
 });
 
 meRouter.post('/punch', async (req, res) => {
-  const body = parse(z.object({
-    latitude: z.number().min(-90).max(90).nullish(),
-    longitude: z.number().min(-180).max(180).nullish(),
-    accuracy: z.number().min(0).nullish(),
-  }).default({}), req.body ?? {});
   const ctx = await loadContext(req.db);
-  const ip = clientIp(req);
-  if (!ipAllowed(ip, ctx.settings.allowedNetworks)) throw new HttpError(403, 'O registro de ponto só é permitido a partir da rede da empresa.');
   const p = await req.db.tx(async (q) => {
     await q.query('select id from users where id = $1 for update', [req.user!.id]);
     const [last] = await q.query('select ts from punches where user_id = $1 and deleted_at is null order by ts desc limit 1', [req.user!.id]);
-    if (last && Date.now() - new Date(last.ts).getTime() < ctx.settings.minPunchIntervalMin * 60_000) {
+    if (last && Date.now() - new Date(last.ts).getTime() < 60_000) {
       throw new HttpError(409, 'Marcação já registrada há instantes. Aguarde um minuto para registrar a próxima.');
     }
     const now = new Date();
-    return insertPunch(q, req.user!.id, now, ymdIn(now, ctx.tz), 'web', {
-      ip, userAgent: String(req.headers['user-agent'] || '').slice(0, 300),
-      latitude: body.latitude, longitude: body.longitude, accuracy: body.accuracy,
-    });
+    return insertPunch(q, req.user!.id, now, ymdIn(now, ctx.tz), 'web');
   });
   const t = await todayFor(req.db, req.user!.id, await loadContext(req.db));
   const idx = t.day.punches.findIndex((x) => x.id === p.id);
@@ -109,5 +97,48 @@ meRouter.post('/requests/:id/cancel', async (req, res) => {
     [Number(req.params.id), req.user!.id]);
   if (!rows.length) throw notFound('Solicitação pendente não encontrada.');
   await audit(req.db, req.user!.id, 'request.cancel', 'punch_request', String(req.params.id));
+  res.json({ ok: true });
+});
+
+/* Justificativa de falta: o colaborador abona o próprio dia, sem aprovação do RH.
+   Fica registrada como ausência (visível e removível pelo RH) e na auditoria. */
+export const JUSTIFICATION_TYPES = ['ATESTADO', 'ABONO', 'FOLGA', 'LICENCA'] as const;
+
+meRouter.get('/absences', async (req, res) => {
+  const rows = await req.db.query(
+    `select a.id, a.start_date, a.end_date, a.type, a.note, a.created_by from absences a
+      where a.user_id = $1 order by a.start_date desc limit 100`, [req.user!.id]);
+  res.json({
+    absences: rows.map((a) => ({ id: a.id, startDate: a.start_date, endDate: a.end_date, type: a.type, note: a.note, mine: a.created_by === req.user!.id })),
+  });
+});
+
+meRouter.post('/absences', async (req, res) => {
+  const date = z.string().refine(isValidDate, 'Data inválida.');
+  const body = parse(z.object({
+    startDate: date,
+    endDate: date.optional(),
+    type: z.enum(JUSTIFICATION_TYPES, { errorMap: () => ({ message: 'Escolha o tipo de justificativa.' }) }),
+    note: z.string().trim().min(3, 'Escreva o motivo da falta.').max(300),
+  }), req.body);
+  const ctx = await loadContext(req.db);
+  const end = body.endDate || body.startDate;
+  if (end < body.startDate) throw badRequest('A data final deve ser igual ou posterior à inicial.');
+  if (end > ctx.today) throw badRequest('Só é possível justificar dias até hoje.');
+  const [u] = await req.db.query('select start_date from users where id = $1', [req.user!.id]);
+  if (body.startDate < u.start_date) throw badRequest('A data é anterior ao início do seu registro de ponto.');
+  const overlap = await req.db.query('select 1 from absences where user_id = $1 and start_date <= $3 and end_date >= $2', [req.user!.id, body.startDate, end]);
+  if (overlap.length) throw badRequest('Esse dia já tem uma justificativa ou ausência registrada.');
+  const [a] = await req.db.query(
+    'insert into absences (user_id, start_date, end_date, type, note, created_by) values ($1,$2,$3,$4,$5,$1) returning id',
+    [req.user!.id, body.startDate, end, body.type, body.note]);
+  await audit(req.db, req.user!.id, 'absence.justify', 'absence', a.id, { ...body, endDate: end });
+  res.status(201).json({ id: a.id });
+});
+
+meRouter.delete('/absences/:id', async (req, res) => {
+  const rows = await req.db.query('delete from absences where id = $1 and user_id = $2 and created_by = $2 returning *', [Number(req.params.id), req.user!.id]);
+  if (!rows.length) throw notFound('Justificativa não encontrada ou registrada pelo RH.');
+  await audit(req.db, req.user!.id, 'absence.delete', 'absence', String(req.params.id), rows[0]);
   res.json({ ok: true });
 });

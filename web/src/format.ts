@@ -69,3 +69,8 @@ export function downloadUrl(path: string) {
   a.click();
   a.remove();
 }
+
+/** plural(2, 'falta') → '2 faltas'; plural(1, 'dia pendente', 'dias pendentes') → '1 dia pendente' */
+export function plural(n: number, one: string, many?: string) {
+  return `${n} ${n === 1 ? one : many || one + 's'}`;
+}

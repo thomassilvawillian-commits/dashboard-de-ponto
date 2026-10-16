@@ -15,7 +15,6 @@ import Approvals from './pages/admin/Approvals';
 import CalendarPage from './pages/admin/CalendarPage';
 import Bank from './pages/admin/Bank';
 import Reports from './pages/admin/Reports';
-import Audit from './pages/admin/Audit';
 import SettingsPage from './pages/admin/SettingsPage';
 
 function Routed() {
@@ -42,7 +41,6 @@ function Routed() {
             <Route path="calendario" element={<CalendarPage />} />
             <Route path="banco" element={<Bank />} />
             <Route path="relatorios" element={<Reports />} />
-            {admin && <Route path="auditoria" element={<Audit />} />}
             {admin && <Route path="configuracoes" element={<SettingsPage />} />}
           </Route>
         )}

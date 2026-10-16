@@ -100,18 +100,31 @@ describe('fluxo completo da API', () => {
     expect(s.daysWorked).toBe(1);
   });
 
-  it('painel gerencial, relatórios e auditoria', async () => {
+  it('painel gerencial, relatórios e registro de alterações', async () => {
     const o = await adminAgent.get(`/api/admin/overview?m=${today().slice(0, 7)}`);
     expect(o.status).toBe(200);
     const bruno = o.body.team.find((t: any) => t.id === empId);
     expect(bruno.today.presence).toBe('trabalhando');
-    expect(o.body.series.length).toBeGreaterThan(27);
     const csv = await adminAgent.get('/api/admin/reports/timesheet.csv?m=2026-02');
     expect(csv.status).toBe(200);
     expect(csv.text.startsWith('﻿Colaborador;')).toBe(true);
     expect(csv.text).toContain('02/02/2026;Seg;Completo;08:00 12:00 13:00 17:00');
-    const audit = await adminAgent.get('/api/admin/audit');
-    expect(audit.body.entries.length).toBeGreaterThan(5);
+    const [{ n }] = await db.query<{ n: number }>('select count(*)::int as n from audit_log');
+    expect(n).toBeGreaterThan(5);
+  });
+
+  it('colaborador justifica a própria falta sem aprovação do RH', async () => {
+    const before = await empAgent.get('/api/me/month?m=2026-03');
+    expect(before.body.summary.days.find((d: any) => d.date === '2026-03-02').status).toBe('falta');
+    const r = await empAgent.post('/api/me/absences').send({ startDate: '2026-03-02', type: 'ATESTADO', note: 'Consulta médica' });
+    expect(r.status).toBe(201);
+    const after = await empAgent.get('/api/me/month?m=2026-03');
+    expect(after.body.summary.days.find((d: any) => d.date === '2026-03-02')).toMatchObject({ status: 'ausencia', balanceMin: 0 });
+    expect((await empAgent.post('/api/me/absences').send({ startDate: '2026-03-02', type: 'ABONO', note: 'De novo' })).status).toBe(400);
+    expect((await empAgent.post('/api/me/absences').send({ startDate: '2099-01-02', type: 'ABONO', note: 'Futuro' })).status).toBe(400);
+    const list = await adminAgent.get('/api/admin/absences?userId=' + empId);
+    expect(list.body.absences.find((a: any) => a.startDate === '2026-03-02').selfJustified).toBe(true);
+    expect((await empAgent.delete(`/api/me/absences/${r.body.id}`)).status).toBe(200);
   });
 
   it('gestor não corrige o próprio ponto nem aprova a própria solicitação', async () => {

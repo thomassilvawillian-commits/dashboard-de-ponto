@@ -1,6 +1,6 @@
-import { AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { ALERTS, STATUS, WEEKDAYS, fmtDayMonth, fmtMin, fmtMonth, shiftMonth } from '../format';
+import { ALERTS, STATUS, WEEKDAYS, fmtDayMonth, fmtMin, fmtMonth, plural, shiftMonth } from '../format';
 import type { Day, MonthSummary } from '../types';
 import { Badge, Stat, cx } from './index';
 
@@ -17,13 +17,11 @@ export function MonthPicker({ value, onChange, max }: { value: string; onChange:
 
 export function SummaryStats({ s }: { s: MonthSummary }) {
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-      <Stat label="Trabalhado" value={fmtMin(s.workedMin)} sub={`de ${fmtMin(s.expectedMin)} previstos até hoje`} />
-      <Stat label="Horas extras" value={fmtMin(s.extraMin)} tone={s.extraMin > 0 ? 'good' : undefined} />
-      <Stat label="Horas faltantes" value={fmtMin(s.missingMin)} tone={s.missingMin > 0 ? 'bad' : undefined} />
-      <Stat label="Saldo do mês" value={fmtMin(s.balanceMin, { sign: true })} tone={s.balanceMin > 0 ? 'good' : s.balanceMin < 0 ? 'bad' : undefined} />
-      <Stat label="Banco acumulado" value={fmtMin(s.bankMin, { sign: true })} tone={s.bankMin > 0 ? 'good' : s.bankMin < 0 ? 'bad' : undefined} sub={s.bankPending ? `${s.bankPending} dia(s) pendente(s) fora do saldo` : 'até o fim do mês ou hoje'} />
-      <Stat label="Ocorrências" value={`${s.absences} falta${s.absences === 1 ? '' : 's'}`} sub={`${s.lateDays} atraso(s) · ${s.pending} pendência(s)`} />
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <Stat label="Trabalhado no mês" value={fmtMin(s.workedMin)} sub={`de ${fmtMin(s.expectedMin)} previstos até hoje`} />
+      <Stat label="Saldo do mês" value={fmtMin(s.balanceMin, { sign: true })} tone={s.balanceMin > 0 ? 'good' : s.balanceMin < 0 ? 'bad' : undefined} sub={`${fmtMin(s.extraMin)} extras · ${fmtMin(s.missingMin)} faltantes`} />
+      <Stat label="Banco de horas" value={fmtMin(s.bankMin, { sign: true })} tone={s.bankMin > 0 ? 'good' : s.bankMin < 0 ? 'bad' : undefined} sub="saldo acumulado" />
+      <Stat label="Faltas" value={s.absences} sub={`${plural(s.lateDays, 'atraso')} · ${plural(s.pending, 'dia pendente', 'dias pendentes')}`} />
     </div>
   );
 }
@@ -57,7 +55,7 @@ export function DayTable({ days, today, renderActions, onDayClick }: { days: Day
               <td className="px-2 py-2.5">
                 <div className="flex items-center gap-1.5">
                   {d.status !== 'futuro' && <StatusBadge d={d} />}
-                  {d.alerts.length > 0 && <span title={d.alerts.map((a) => ALERTS[a]).join('\n')} className="text-warn-ink"><AlertTriangle className="size-4" aria-label={d.alerts.map((a) => ALERTS[a]).join('. ')} /></span>}
+                  {d.alerts.length > 0 && <span title={d.alerts.map((a) => ALERTS[a]).join('\n')} className="cursor-help text-xs font-medium text-warn-ink underline decoration-dotted">{d.alerts.length === 1 ? 'alerta' : `${d.alerts.length} alertas`}</span>}
                 </div>
               </td>
               <td className="px-2 py-2.5">
@@ -76,7 +74,7 @@ export function DayTable({ days, today, renderActions, onDayClick }: { days: Day
           ))}
         </tbody>
       </table>
-      <p className="px-4 py-3 text-xs text-ink-3">Marcações destacadas foram incluídas por ajuste ou importação. Passe o mouse sobre o ícone de alerta para ver o motivo.</p>
+      <p className="px-4 py-3 text-xs text-ink-3">Marcações destacadas foram incluídas por ajuste ou importação. Passe o mouse sobre “alerta” para ver o motivo.</p>
     </div>
   );
 }

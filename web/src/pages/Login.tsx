@@ -1,4 +1,3 @@
-import { LogIn } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { post } from '../api';
 import { useAuth } from '../auth';
@@ -27,12 +26,12 @@ export default function Login() {
   }
 
   return (
-    <AuthLayout title={company?.name || 'Controle de Ponto'} subtitle="Entre para registrar seu ponto">
+    <AuthLayout title={company?.name || 'Controle de Ponto'} subtitle="Controle de ponto">
       <form onSubmit={submit} className="flex flex-col gap-4">
         <Field label="Usuário">{(id) => <Input id={id} autoComplete="username" autoFocus value={username} onChange={(e) => setUsername(e.target.value)} required />}</Field>
         <Field label="Senha ou PIN">{(id) => <Input id={id} type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />}</Field>
         <ErrorBox error={error} />
-        <Button variant="primary" size="lg" loading={busy} type="submit"><LogIn className="size-4" />Entrar</Button>
+        <Button variant="primary" size="lg" loading={busy} type="submit">Entrar</Button>
         <p className="text-center text-xs text-ink-3">Esqueceu a senha? Peça ao RH para gerar uma senha temporária.</p>
       </form>
     </AuthLayout>

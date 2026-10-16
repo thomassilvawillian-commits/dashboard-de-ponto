@@ -24,11 +24,10 @@ export async function assertPunchAllowed(q: Queryable, userId: number, ts: Date,
   return date;
 }
 
-export async function insertPunch(q: Queryable, userId: number, ts: Date, workDate: string, source: string, extra: { note?: string | null; createdBy?: number | null; ip?: string; userAgent?: string; latitude?: number | null; longitude?: number | null; accuracy?: number | null } = {}) {
+export async function insertPunch(q: Queryable, userId: number, ts: Date, workDate: string, source: string, extra: { note?: string | null; createdBy?: number | null } = {}) {
   const [p] = await q.query(
-    `insert into punches (user_id, ts, work_date, source, note, created_by, ip, user_agent, latitude, longitude, accuracy)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) returning *`,
-    [userId, ts, workDate, source, extra.note ?? null, extra.createdBy ?? null, extra.ip ?? null, extra.userAgent ?? null, extra.latitude ?? null, extra.longitude ?? null, extra.accuracy ?? null]);
+    `insert into punches (user_id, ts, work_date, source, note, created_by) values ($1,$2,$3,$4,$5,$6) returning *`,
+    [userId, ts, workDate, source, extra.note ?? null, extra.createdBy ?? null]);
   return p;
 }
 

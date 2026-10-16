@@ -5,10 +5,7 @@ export interface Settings {
   timezone: string;
   toleranceDailyMin: number;
   toleranceLateMin: number;
-  minPunchIntervalMin: number;
   autoApproveRequests: boolean;
-  requestGeolocation: boolean;
-  allowedNetworks: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -16,10 +13,7 @@ export const DEFAULT_SETTINGS: Settings = {
   timezone: 'America/Sao_Paulo',
   toleranceDailyMin: 10,
   toleranceLateMin: 5,
-  minPunchIntervalMin: 1,
   autoApproveRequests: false,
-  requestGeolocation: false,
-  allowedNetworks: '',
 };
 
 export async function getSettings(q: Queryable): Promise<Settings> {
@@ -36,10 +30,4 @@ export async function saveSettings(q: Queryable, patch: Partial<Settings>) {
       `insert into settings (key, value) values ($1, $2::jsonb)
        on conflict (key) do update set value = excluded.value`, [key, JSON.stringify(value)]);
   }
-}
-
-/** Lista de IPs/prefixos separados por vírgula, ex.: "200.10.20.30, 192.168.0.". Vazio = qualquer rede. */
-export function ipAllowed(ip: string, allowed: string) {
-  const list = allowed.split(',').map((s) => s.trim()).filter(Boolean);
-  return !list.length || list.some((p) => (p.endsWith('.') || p.endsWith(':') ? ip.startsWith(p) : ip === p));
 }

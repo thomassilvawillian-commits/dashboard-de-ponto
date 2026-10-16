@@ -1,4 +1,3 @@
-import { KeyRound } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { post } from '../api';
 import { useAuth } from '../auth';
@@ -35,12 +34,12 @@ export default function ChangePassword({ forced }: { forced?: boolean }) {
       <Field label="Nova senha" hint="Mínimo de 6 caracteres">{(id) => <Input id={id} type="password" value={f.next} onChange={(e) => setF({ ...f, next: e.target.value })} autoComplete="new-password" required />}</Field>
       <Field label="Confirme a nova senha">{(id) => <Input id={id} type="password" value={f.confirm} onChange={(e) => setF({ ...f, confirm: e.target.value })} autoComplete="new-password" required />}</Field>
       <ErrorBox error={error} />
-      <Button variant="primary" loading={busy} type="submit"><KeyRound className="size-4" />Salvar nova senha</Button>
+      <Button variant="primary" loading={busy} type="submit">Salvar nova senha</Button>
       {forced && <Button variant="ghost" type="button" onClick={logout}>Sair</Button>}
     </form>
   );
 
-  if (forced) return <AuthLayout title="Crie sua senha" subtitle="Por segurança, defina uma senha pessoal antes de continuar.">{form}</AuthLayout>;
+  if (forced) return <AuthLayout title="Defina sua senha" subtitle="No primeiro acesso é preciso trocar a senha recebida por uma senha pessoal.">{form}</AuthLayout>;
   return (
     <>
       <PageHeader title="Trocar senha" subtitle="As outras sessões abertas com sua conta serão encerradas." />

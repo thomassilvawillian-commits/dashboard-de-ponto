@@ -1,6 +1,6 @@
 # Controle de Ponto
 
-Plataforma web para registro de jornada, espelho de ponto e banco de horas. Funciona no computador e no celular, tem um painel de gestão em tempo real para o RH e guarda os dados num banco próprio (PostgreSQL), sem depender de planilhas no Google Drive.
+Plataforma web para registro de jornada, espelho de ponto e banco de horas. Funciona no computador e no celular, tem um painel simples para o RH e guarda os dados num banco próprio (PostgreSQL), sem depender de planilhas no Google Drive.
 
 **Software criado por Willian Thomas.**
 
@@ -12,14 +12,15 @@ Plataforma web para registro de jornada, espelho de ponto e banco de horas. Func
 
 - Registro de ponto com um toque, usando o relógio do servidor, com proteção contra toque duplo.
 - Linha do tempo do dia, horas trabalhadas, progresso da jornada e saldo do banco de horas.
-- Espelho de ponto mensal com marcações, previsto, trabalhado, saldo diário e gráfico.
+- Espelho de ponto mensal com marcações, previsto, trabalhado e saldo de cada dia.
 - Solicitação de ajuste: incluir um horário esquecido ou desconsiderar uma marcação errada, com motivo.
+- **Justificativa de falta sem depender do RH:** no espelho, o próprio colaborador justifica a falta (atestado, consulta, motivo pessoal, folga combinada ou licença). O dia é abonado na hora; o RH vê todas as justificativas em *Feriados e ausências* e pode removê-las.
 - Acompanhamento das solicitações (pendente, aprovada, recusada) e impressão do próprio espelho.
 - Pode ser adicionado à tela inicial do celular como um aplicativo, com tema claro e escuro.
 
 ### Para o RH e os gestores
 
-- **Painel em tempo real:** quem está trabalhando, em intervalo, com jornada encerrada ou sem registro; horas da equipe por dia; extras, faltas, atrasos e banco acumulado de todos.
+- **Painel:** quem está trabalhando agora e, para cada pessoa, horas do mês, saldo, banco de horas, faltas e atrasos.
 - **Colaboradores:** cadastro completo (cargo, departamento, matrícula, perfil de acesso), senha temporária gerada pelo sistema, desligamento e reativação.
 - **Jornadas por vigência:** horas previstas por dia da semana, entrada prevista e intervalo. Uma nova jornada vale a partir da data escolhida e não altera o cálculo do passado.
 - **Aprovações:** fila de ajustes solicitados, com aprovação ou recusa e observação.
@@ -28,8 +29,7 @@ Plataforma web para registro de jornada, espelho de ponto e banco de horas. Func
 - **Ausências:** férias, atestados, licenças, abonos e folgas não geram falta; a compensação desconta do banco.
 - **Banco de horas:** saldo inicial, pagamento de extras, descontos e correções lançados como movimentações.
 - **Relatórios:** resumo mensal e espelho de ponto em CSV (abre direto no Excel) e espelho para impressão/PDF com campos de assinatura.
-- **Auditoria:** registro permanente de logins, alterações, aprovações e exportações.
-- **Configurações:** fuso horário, tolerâncias, aprovação automática de ajustes, registro de localização e restrição por rede da empresa.
+- **Configurações:** nome da empresa, fuso horário, tolerâncias e aprovação automática de ajustes.
 
 ### Perfis de acesso
 
@@ -37,7 +37,7 @@ Plataforma web para registro de jornada, espelho de ponto e banco de horas. Func
 | --- | --- |
 | Colaborador | Registrar ponto, ver o próprio espelho e solicitar ajustes. |
 | Gestor | Tudo do colaborador, mais painel, espelhos da equipe, aprovações, correções de marcação, ausências e relatórios. |
-| Administrador | Tudo do gestor, mais cadastros, jornadas, feriados, banco de horas, auditoria e configurações. |
+| Administrador | Tudo do gestor, mais cadastros, jornadas, feriados, banco de horas e configurações. |
 
 Pode haver vários gestores e administradores. O sistema impede remover o último administrador ativo.
 
@@ -48,7 +48,8 @@ Pode haver vários gestores e administradores. O sistema impede remover o últim
 | Horas trabalhadas | Soma dos pares de marcações (entrada → saída, retorno → saída...). Aceita qualquer número de pares no dia. |
 | Dia completo | Número par de marcações. Número ímpar em dia passado fica **pendente** e não gera saldo até ser corrigido. |
 | Saldo do dia | Trabalhado − previsto. Variações até a **tolerância diária** (padrão 10 min, CLT art. 58 §1º) não geram saldo. |
-| Falta | Dia útil passado, dentro do período de apuração, sem marcações, sem feriado e sem ausência. Debita a jornada do dia. |
+| Falta | Dia útil passado, dentro do período de apuração, sem marcações, sem feriado, sem ausência e sem justificativa. Debita a jornada do dia. |
+| Falta justificada | Justificada pelo colaborador ou registrada pelo RH: não debita o banco de horas. Ajustes de horário continuam passando pela aprovação do RH. |
 | Atraso | Primeira marcação depois da entrada prevista, acima da tolerância de atraso (padrão 5 min). |
 | Feriado e folga | Não geram débito; trabalho nesses dias vira crédito. |
 | Banco acumulado | Saldo inicial + saldos diários desde o início da apuração + movimentações lançadas, até o fim do mês consultado ou hoje. |
@@ -63,7 +64,7 @@ O sistema apura horas; não calcula valores de folha de pagamento. Turnos que at
 | --- | --- |
 | Servidor | Node.js 22, Express 5, TypeScript, validação com Zod |
 | Banco de dados | PostgreSQL (produção) ou PostgreSQL embutido via PGlite (testes, demonstração e instalações pequenas) |
-| Interface | React 19, React Router, Tailwind CSS 4, ícones Lucide, gráficos em SVG próprios |
+| Interface | React 19, React Router, Tailwind CSS 4, ícones Lucide |
 | Testes | Vitest e Supertest, executados nos dois bancos |
 
 Segurança: senhas com scrypt e salt individual, sessão em cookie `HttpOnly`/`SameSite`, bloqueio após 5 tentativas de login em 15 minutos, permissões verificadas no servidor em toda requisição, API que aceita apenas JSON e proteção contra fórmulas em arquivos CSV.
@@ -95,22 +96,14 @@ Para desenvolver com recarga automática, rode `npm run dev:server` e `npm run d
 
 O sistema é um único serviço Node.js e precisa de um PostgreSQL. Configure a variável `DATABASE_URL` com o endereço do banco; as tabelas são criadas automaticamente na primeira inicialização.
 
-### Opção 1 — Render + Neon (gratuito para começar)
+### Hospedagem gratuita: Render + Neon
 
 1. Crie um banco gratuito em [neon.tech](https://neon.tech) e copie a *connection string* (`postgres://...?sslmode=require`).
 2. Em [render.com](https://render.com), escolha **New → Blueprint** e selecione este repositório. O arquivo `render.yaml` já define o serviço.
 3. Quando solicitado, cole a connection string em `DATABASE_URL`.
 4. Ao terminar a implantação, abra o endereço gerado e faça a configuração inicial.
 
-No plano gratuito do Render o serviço "dorme" após um período sem acesso e leva alguns segundos para acordar. Para uso diário da equipe, prefira um plano pago.
-
-### Opção 2 — Servidor próprio com Docker
-
-```bash
-docker compose up -d
-```
-
-Sobe o sistema e um PostgreSQL com volume persistente em <http://localhost:3000>. Coloque um proxy com HTTPS (Caddy, Nginx, Cloudflare) na frente antes de liberar para a equipe.
+Os dois serviços têm plano gratuito. No Render gratuito o sistema "dorme" depois de uns 15 minutos sem acesso; o primeiro acesso seguinte pode levar até um minuto para abrir, e depois funciona normalmente. As marcações usam o horário do servidor no momento do clique, então essa espera não altera o horário registrado.
 
 ### Variáveis de ambiente
 

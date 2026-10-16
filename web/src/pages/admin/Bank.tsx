@@ -1,4 +1,4 @@
-import { Plus, Scale, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { del, get, post } from '../../api';
 import { useAuth } from '../../auth';
@@ -36,12 +36,12 @@ export default function Bank() {
       <PageHeader title="Banco de horas" subtitle="Pagamentos, descontos e correções que alteram o saldo acumulado."
         actions={<>
           <UserSelect users={users.data?.users || []} value={filter} onChange={setFilter} allowAll="Todos os colaboradores" />
-          {admin && <Button variant="primary" onClick={() => { setFormError(null); setForm({ userId: filter, date: new Date().toISOString().slice(0, 10), hours: '', direction: '-', kind: 'PAGAMENTO', note: '' }); }}><Plus className="size-4" />Lançar</Button>}
+          {admin && <Button variant="primary" onClick={() => { setFormError(null); setForm({ userId: filter, date: new Date().toISOString().slice(0, 10), hours: '', direction: '-', kind: 'PAGAMENTO', note: '' }); }}>Lançar</Button>}
         </>} />
       <ErrorBox error={error} />
       <Card pad={false}>
         {loading && !data ? <Spinner /> : !data?.adjustments.length ? (
-          <Empty icon={<Scale className="size-8" />} title="Nenhuma movimentação">Ao pagar horas extras ou corrigir um saldo, lance aqui para manter o banco de horas exato.</Empty>
+          <Empty title="Nenhuma movimentação">Ao pagar horas extras ou corrigir um saldo, lance aqui para manter o banco de horas exato.</Empty>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-sm">
