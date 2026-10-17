@@ -152,7 +152,7 @@ Para desenvolver com recarga automática, rode `npm run dev:server` e `npm run d
 bash scripts/empacotar-windows.sh    # cria release/ControleDePonto-Windows.zip
 ```
 
-O script compila o projeto, baixa o Node.js para Windows do site oficial (conferindo o SHA-256) e monta a pasta com os atalhos. Ao enviar uma tag de versão (`git tag v2.1.0 && git push origin v2.1.0`), o GitHub Actions gera o pacote e o publica na página de downloads.
+O script compila o projeto, baixa o Node.js para Windows do site oficial (conferindo o SHA-256) e monta a pasta com os atalhos. Para publicar uma versão nova, aumente o campo `version` do `package.json` da raiz (por exemplo, de `2.1.0` para `2.2.0`) e envie para o `main`: o GitHub Actions gera o pacote e cria a versão `v2.2.0` na página de downloads.
 
 ### Usar com PostgreSQL (opcional)
 

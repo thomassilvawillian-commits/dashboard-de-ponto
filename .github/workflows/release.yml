@@ -1,7 +1,9 @@
 name: Publicar versão para Windows
+# Ao enviar para o main um package.json com versão nova (ex.: 2.1.0 → 2.2.0),
+# gera o pacote para Windows e publica a versão v<versão> na página de downloads.
 on:
   push:
-    tags: ['v*']
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -10,26 +12,29 @@ permissions:
 jobs:
   windows:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
+      - name: Verificar se a versão já foi publicada
+        id: versao
+        run: |
+          TAG="v$(node -p "require('./package.json').version")"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          if gh release view "$TAG" >/dev/null 2>&1; then echo "nova=false" >> "$GITHUB_OUTPUT"; else echo "nova=true" >> "$GITHUB_OUTPUT"; fi
       - uses: actions/setup-node@v4
+        if: steps.versao.outputs.nova == 'true'
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - run: npm test
-      - run: bash scripts/empacotar-windows.sh
+      - if: steps.versao.outputs.nova == 'true'
+        run: npm ci
+      - if: steps.versao.outputs.nova == 'true'
+        run: npm test
+      - if: steps.versao.outputs.nova == 'true'
+        run: bash scripts/empacotar-windows.sh
       - name: Publicar na página de downloads
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
+        if: steps.versao.outputs.nova == 'true'
         run: |
-          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "Controle de Ponto $TAG" --notes-file .github/release-notes.md
-          gh release upload "$TAG" release/ControleDePonto-Windows.zip --clobber
-      - name: Guardar o pacote (execução manual)
-        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ControleDePonto-Windows
-          path: release/ControleDePonto-Windows.zip
+          gh release create "${{ steps.versao.outputs.tag }}" release/ControleDePonto-Windows.zip \
+            --target "$GITHUB_SHA" --title "Controle de Ponto ${{ steps.versao.outputs.tag }}" --notes-file .github/release-notes.md
