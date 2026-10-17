@@ -1,10 +1,14 @@
 # Controle de Ponto
 
-Sistema web gratuito para registro de ponto, espelho mensal e banco de horas. Funciona sozinho, sem planilha no Google Drive: basta abrir o link, entrar com usuário e senha e registrar. Foi pensado para ser simples de usar por qualquer pessoa, no computador ou no celular, com visual limpo, cores suaves e tema claro ou escuro.
+Programa gratuito de controle de ponto, espelho mensal e banco de horas, que roda no próprio computador. Não depende de planilha no Google Drive, de internet nem de servidor: basta baixar, extrair e dar dois cliques. O banco de dados é criado automaticamente na pasta do programa. Foi pensado para ser simples de usar por qualquer pessoa, com visual limpo, cores suaves e tema claro ou escuro.
+
+### [⬇ Baixar para Windows](https://github.com/thomassilvawillian-commits/dashboard-de-ponto/releases/latest/download/ControleDePonto-Windows.zip)
+
+Depois de baixar: clique com o botão direito no arquivo, escolha **Extrair tudo** e, na pasta extraída, dê dois cliques em **Abrir Controle de Ponto**. Veja [Como usar](#como-usar).
 
 **Software criado por Willian Thomas.**
 
-> A versão anterior, em Google Apps Script e Planilhas, está preservada em [`legacy/`](legacy/). Os cadastros e marcações dela podem ser importados (veja [Migrar da versão em planilha](#migrar-da-versão-em-planilha)).
+> A versão anterior, em Google Apps Script e Planilhas, está preservada em [`legacy/`](legacy/). Os cadastros e marcações dela podem ser importados (veja [Trazer os dados da planilha antiga](#trazer-os-dados-da-planilha-antiga)).
 
 ## Telas
 
@@ -16,7 +20,47 @@ Sistema web gratuito para registro de ponto, espelho mensal e banco de horas. Fu
 | --- | --- |
 | ![Espelho com a janela de justificar falta](docs/telas/justificar-falta.png) | <img src="docs/telas/celular.png" alt="Registro de ponto no celular" width="260"> |
 
-As telas acima usam os dados de demonstração (veja [Executar no seu computador](#executar-no-seu-computador)).
+As telas acima usam dados de demonstração.
+
+## Como usar
+
+### Instalar
+
+1. Baixe o arquivo [ControleDePonto-Windows.zip](https://github.com/thomassilvawillian-commits/dashboard-de-ponto/releases/latest/download/ControleDePonto-Windows.zip) (cerca de 45 MB). Todas as versões ficam na página de [downloads](https://github.com/thomassilvawillian-commits/dashboard-de-ponto/releases).
+2. Clique com o botão direito no arquivo e escolha **Extrair tudo**. Coloque a pasta num lugar fixo, como `Documentos`.
+3. Dê dois cliques em **Abrir Controle de Ponto**.
+4. Na primeira vez, informe o nome da empresa e crie a conta do administrador (RH).
+
+Não é preciso instalar mais nada: o programa já traz tudo o que precisa. Uma janela preta fica aberta enquanto o sistema estiver em uso; para encerrar, basta fechá-la. Se abrir o atalho de novo com o sistema já aberto, ele apenas mostra a tela outra vez.
+
+Na primeira vez, o Windows pode exibir avisos:
+
+- **"O Windows protegeu o computador":** clique em **Mais informações** e depois em **Executar assim mesmo**. O aviso aparece porque o programa não tem assinatura digital paga.
+- **Firewall:** clique em **Permitir** para que celulares e outros computadores da mesma rede possam usar o sistema. Se recusar, ele continua funcionando neste computador.
+
+### Um computador para todos
+
+O uso mais comum é deixar o programa num computador da empresa onde todos registram o ponto. Por isso, a opção **Sair da conta depois de registrar o ponto** vem ligada: 5 segundos após a marcação, o sistema sai da conta para a próxima pessoa. Ela pode ser desligada em *Configurações*.
+
+### Celulares e outros computadores
+
+Com o programa aberto, a janela preta mostra um endereço como `http://192.168.0.10:3000`. Qualquer celular ou computador conectado à **mesma rede Wi-Fi** pode abrir esse endereço no navegador e usar o sistema normalmente. Os dados continuam todos no computador onde o programa está aberto.
+
+### Cópia de segurança
+
+Todos os dados ficam na pasta `dados`, ao lado do atalho. Não apague essa pasta. Para fazer cópia de segurança, feche o programa e copie a pasta `dados` para um pendrive ou para a nuvem. Para restaurar, coloque a pasta de volta.
+
+### Atualizar para uma versão nova
+
+Feche o programa, baixe e extraia a versão nova e copie para ela a pasta `dados` da versão antiga.
+
+### Trazer os dados da planilha antiga
+
+1. Na planilha do Google, escolha **Arquivo → Fazer download → Microsoft Excel (.xlsx)**.
+2. Feche o Controle de Ponto.
+3. Arraste o arquivo baixado e solte em cima de **Importar planilha antiga**, na pasta do programa.
+
+São importados os colaboradores (com jornada, data de início, saldo inicial e situação), os PINs e as marcações aprovadas. A conta de RH vira **Administrador**. Cada pessoa entra com o mesmo nome e PIN de antes e define uma senha pessoal no primeiro acesso. A importação pode ser repetida: o que já foi importado é ignorado.
 
 ## O que o sistema faz
 
@@ -41,7 +85,7 @@ As telas acima usam os dados de demonstração (veja [Executar no seu computador
 - **Ausências:** férias, atestados, licenças, abonos e folgas não geram falta; a compensação desconta do banco.
 - **Banco de horas:** saldo inicial, pagamento de extras, descontos e correções lançados como movimentações.
 - **Relatórios:** resumo mensal e espelho de ponto em CSV (abre direto no Excel) e espelho para impressão/PDF com campos de assinatura.
-- **Configurações:** nome da empresa, fuso horário, tolerâncias e aprovação automática de ajustes.
+- **Configurações:** nome da empresa, fuso horário, tolerâncias, aprovação automática de ajustes e saída automática da conta em computador compartilhado.
 
 ### Perfis de acesso
 
@@ -75,74 +119,54 @@ O sistema apura horas; não calcula valores de folha de pagamento. Turnos que at
 | Parte | Tecnologia |
 | --- | --- |
 | Servidor | Node.js 22, Express 5, TypeScript, validação com Zod |
-| Banco de dados | PostgreSQL (produção) ou PostgreSQL embutido via PGlite (testes, demonstração e instalações pequenas) |
+| Banco de dados | PostgreSQL embutido via PGlite, gravado na pasta `dados` (ou PostgreSQL externo, opcional) |
 | Interface | React 19, React Router, Tailwind CSS 4, ícones Lucide |
 | Testes | Vitest e Supertest, executados nos dois bancos |
 
+Programa para Windows: pasta portátil com Node.js incluído, gerada automaticamente pelo GitHub Actions.
+
 Segurança: senhas com scrypt e salt individual, sessão em cookie `HttpOnly`/`SameSite`, bloqueio após 5 tentativas de login em 15 minutos, permissões verificadas no servidor em toda requisição, API que aceita apenas JSON e proteção contra fórmulas em arquivos CSV.
 
-## Executar no seu computador
+## Para desenvolvedores
 
 Pré-requisito: [Node.js 22](https://nodejs.org).
 
 ```bash
 npm install
 npm run build
-npm start
+npm run desktop -w server     # abre como o programa: dados em ./dados e navegador automático
 ```
 
-Abra <http://localhost:3000>. Na primeira visita o sistema pede o nome da empresa, o fuso horário e cria a conta de administrador. Sem `DATABASE_URL`, os dados ficam na pasta `data/`.
-
-Para ver o sistema já preenchido com uma empresa fictícia:
+Com dados de demonstração (usuário `admin`, senha `demo1234`):
 
 ```bash
 DATA_DIR=./data-demo npm run demo -w server
 DATA_DIR=./data-demo npm start
 ```
 
-Entre com usuário `admin` e senha `demo1234`.
-
 Para desenvolver com recarga automática, rode `npm run dev:server` e `npm run dev:web` em dois terminais e abra <http://localhost:5173>.
 
-## Colocar no ar
+### Gerar o pacote para Windows
 
-O sistema é um único serviço Node.js e precisa de um PostgreSQL. Configure a variável `DATABASE_URL` com o endereço do banco; as tabelas são criadas automaticamente na primeira inicialização.
+```bash
+bash scripts/empacotar-windows.sh    # cria release/ControleDePonto-Windows.zip
+```
 
-### Hospedagem gratuita: Render + Neon
+O script compila o projeto, baixa o Node.js para Windows do site oficial (conferindo o SHA-256) e monta a pasta com os atalhos. Ao enviar uma tag de versão (`git tag v2.1.0 && git push origin v2.1.0`), o GitHub Actions gera o pacote e o publica na página de downloads.
 
-1. Crie um banco gratuito em [neon.tech](https://neon.tech) e copie a *connection string* (`postgres://...?sslmode=require`).
-2. Em [render.com](https://render.com), escolha **New → Blueprint** e selecione este repositório. O arquivo `render.yaml` já define o serviço.
-3. Quando solicitado, cole a connection string em `DATABASE_URL`.
-4. Ao terminar a implantação, abra o endereço gerado e faça a configuração inicial.
+### Usar com PostgreSQL (opcional)
 
-Os dois serviços têm plano gratuito. No Render gratuito o sistema "dorme" depois de uns 15 minutos sem acesso; o primeiro acesso seguinte pode levar até um minuto para abrir, e depois funciona normalmente. As marcações usam o horário do servidor no momento do clique, então essa espera não altera o horário registrado.
-
-### Variáveis de ambiente
+O programa usa um PostgreSQL embutido (PGlite), gravado em arquivos na pasta `dados`. Também é possível rodar como servidor com um PostgreSQL externo, definindo `DATABASE_URL`; as tabelas são criadas automaticamente.
 
 | Variável | Padrão | Uso |
 | --- | --- | --- |
-| `DATABASE_URL` | — | PostgreSQL. Vazio usa o banco embutido em `DATA_DIR`. |
-| `DATA_DIR` | `./data` | Pasta do banco embutido. |
+| `DATABASE_URL` | — | PostgreSQL externo. Vazio usa o banco embutido. |
+| `DATA_DIR` | `./data` (`dados` no programa) | Pasta do banco embutido. |
 | `PORT` | `3000` | Porta HTTP. |
 | `SESSION_HOURS` | `12` | Duração da sessão. |
-| `NODE_ENV` | — | Use `production` em produção (ativa cookies seguros, que exigem HTTPS). |
-| `TRUST_PROXY` | ativo | Use `0` se o serviço não estiver atrás de um proxy. |
-| `INSECURE_COOKIES` | — | Use `1` apenas para testar em produção sem HTTPS (por exemplo, pelo IP da rede local). |
+| `NODE_ENV` | — | `production` ativa cookies seguros, que exigem HTTPS. |
 
-O banco embutido é prático para testar ou para uma única loja num servidor próprio, mas não roda em hospedagens com disco temporário (como o plano gratuito do Render). Nesses casos, use PostgreSQL.
-
-## Migrar da versão em planilha
-
-1. Na planilha antiga, escolha **Arquivo → Fazer download → Microsoft Excel (.xlsx)**.
-2. Com `DATABASE_URL` (ou `DATA_DIR`) apontando para o banco novo, execute:
-
-   ```bash
-   npm run importar-planilha -- caminho/Controle_de_Ponto.xlsx
-   ```
-
-3. O script importa os colaboradores (com jornada, data de início, saldo inicial e situação), os PINs atuais e as marcações aprovadas. A conta de RH vira **Administrador**.
-
-Cada pessoa entra com o mesmo nome e PIN de antes e define uma senha pessoal no primeiro acesso. O script pode ser executado mais de uma vez: o que já foi importado é ignorado. Com o banco embutido, pare o servidor antes de importar.
+O comando de importação também funciona aqui: `npm run importar-planilha -- caminho/planilha.xlsx`.
 
 ## Estrutura do projeto
 
@@ -151,9 +175,11 @@ server/            API, regras de apuração e banco de dados
   src/domain/      cálculo da jornada, fuso horário e feriados (funções puras)
   src/routes/      rotas da API (autenticação, colaborador, gestão)
   src/services/    acesso aos dados e regras compartilhadas
+  src/desktop.ts   modo programa: banco na pasta dados e abertura do navegador
   src/scripts/     importação da planilha e dados de demonstração
   test/            testes de cálculo e da API
 web/               interface React
+scripts/           geração do pacote para Windows
 docs/telas/        capturas de tela usadas neste README
 legacy/            versão 1 em Google Apps Script
 ```

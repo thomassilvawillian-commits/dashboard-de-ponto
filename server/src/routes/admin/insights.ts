@@ -141,6 +141,7 @@ insightsRouter.put('/settings', requireRole('ADMIN'), async (req, res) => {
     toleranceDailyMin: z.number().int().min(0).max(60),
     toleranceLateMin: z.number().int().min(0).max(120),
     autoApproveRequests: z.boolean(),
+    sharedComputer: z.boolean(),
   }).partial(), req.body);
   await saveSettings(req.db, body);
   await audit(req.db, req.user!.id, 'settings.update', 'settings', null, body);

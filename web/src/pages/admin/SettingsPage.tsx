@@ -5,7 +5,7 @@ import { Button, Card, ErrorBox, Field, Input, PageHeader, Select, Spinner, useL
 import { TIMEZONES } from '../Setup';
 
 interface Settings {
-  companyName: string; timezone: string; toleranceDailyMin: number; toleranceLateMin: number; autoApproveRequests: boolean;
+  companyName: string; timezone: string; toleranceDailyMin: number; toleranceLateMin: number; autoApproveRequests: boolean; sharedComputer: boolean;
 }
 
 function Toggle({ checked, onChange, title, text }: { checked: boolean; onChange: (v: boolean) => void; title: string; text: string }) {
@@ -55,6 +55,10 @@ export default function SettingsPage() {
             <Field label="Tolerância diária (min)" hint="Variações até este limite no dia não geram saldo. CLT: até 10 min.">{(id) => <Input id={id} type="number" min={0} max={60} value={s.toleranceDailyMin} onChange={num('toleranceDailyMin')} />}</Field>
             <Field label="Tolerância de atraso (min)" hint="Atrasos na entrada até este limite não são contados.">{(id) => <Input id={id} type="number" min={0} max={120} value={s.toleranceLateMin} onChange={num('toleranceLateMin')} />}</Field>
           </div>
+        </Card>
+        <Card title="Computador compartilhado">
+          <Toggle checked={s.sharedComputer} onChange={(v) => setS({ ...s, sharedComputer: v })} title="Sair da conta depois de registrar o ponto"
+            text="Use quando todos batem o ponto no mesmo computador: 5 segundos após registrar, o sistema sai da conta para a próxima pessoa." />
         </Card>
         <Card title="Ajustes de ponto">
           <Toggle checked={s.autoApproveRequests} onChange={(v) => setS({ ...s, autoApproveRequests: v })} title="Aprovar ajustes automaticamente"

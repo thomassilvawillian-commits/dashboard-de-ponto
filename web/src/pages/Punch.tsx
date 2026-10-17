@@ -10,7 +10,7 @@ import { StatusBadge } from '../ui/timesheet';
 
 interface Today {
   now: string; today: string; timezone: string; day: Day; bankMin: number; schedule: Schedule | null;
-  next: { index: number; label: string; isEntry: boolean };
+  next: { index: number; label: string; isEntry: boolean }; sharedComputer: boolean;
 }
 
 function useServerClock(serverNow?: string) {
@@ -32,13 +32,22 @@ const ACTION: Record<string, string> = {
 };
 
 export default function Punch() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const toast = useToast();
   const { data, error, loading, reload } = useLoad<Today>(() => get('/me/today'), []);
   const now = useServerClock(data?.now);
   const [busy, setBusy] = useState(false);
   const [punchError, setPunchError] = useState<string | null>(null);
   const [requestOpen, setRequestOpen] = useState(false);
+  const [done, setDone] = useState<{ text: string; seconds: number } | null>(null);
+
+  // Computador compartilhado: depois de registrar, mostra a confirmação e sai da conta.
+  useEffect(() => {
+    if (!done) return;
+    if (done.seconds <= 0) { logout(); return; }
+    const t = setTimeout(() => setDone({ ...done, seconds: done.seconds - 1 }), 1000);
+    return () => clearTimeout(t);
+  }, [done, logout]);
 
   useEffect(() => {
     const t = setInterval(reload, 60_000);
@@ -48,6 +57,18 @@ export default function Punch() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  if (done) {
+    return (
+      <div className="card mx-auto mt-10 max-w-md p-6 text-center">
+        <p className="text-lg font-semibold">{done.text}</p>
+        <p className="mt-2 text-sm text-ink-2">Saindo da sua conta em {done.seconds} segundo{done.seconds === 1 ? '' : 's'} para a próxima pessoa.</p>
+        <div className="mt-5 flex justify-center gap-2">
+          <Button variant="primary" onClick={logout}>Sair agora</Button>
+          <Button onClick={() => { setDone(null); reload(); }}>Continuar conectado</Button>
+        </div>
+      </div>
+    );
+  }
   if (loading && !data) return <Spinner />;
   if (error && !data) return <ErrorBox error={error} />;
   if (!data) return null;
@@ -63,8 +84,9 @@ export default function Punch() {
     setPunchError(null);
     try {
       const r = await post('/me/punch');
-      toast(`${r.punch.label} registrada às ${new Date(r.punch.ts).toLocaleTimeString('pt-BR', { timeZone: tz, hour: '2-digit', minute: '2-digit' })}.`);
-      reload();
+      const text = `${r.punch.label} registrada às ${new Date(r.punch.ts).toLocaleTimeString('pt-BR', { timeZone: tz, hour: '2-digit', minute: '2-digit' })}.`;
+      if (data!.sharedComputer) setDone({ text, seconds: 5 });
+      else { toast(text); reload(); }
     } catch (e: any) {
       setPunchError(e.message);
     } finally {

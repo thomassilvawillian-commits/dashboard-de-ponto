@@ -37,7 +37,7 @@ export function createApp(db: Db, opts: { webDist?: string | null } = {}) {
   api.use(loadSession);
   api.get('/health', async (_req, res) => {
     await db.query('select 1');
-    res.json({ ok: true, database: db.kind });
+    res.json({ ok: true, app: 'controle-de-ponto', database: db.kind });
   });
   api.use('/auth', authRouter);
   api.use('/me', meRouter);

@@ -27,6 +27,7 @@ meRouter.get('/today', async (req, res) => {
     now: ctx.now.toISOString(), today: ctx.today, timezone: ctx.tz,
     day: t.day, bankMin: t.bank.balanceMin, schedule,
     next: { index: n, label: punchLabel(n), isEntry: n % 2 === 0 },
+    sharedComputer: ctx.settings.sharedComputer,
   });
 });
 

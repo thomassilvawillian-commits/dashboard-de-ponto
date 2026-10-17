@@ -6,6 +6,8 @@ export interface Settings {
   toleranceDailyMin: number;
   toleranceLateMin: number;
   autoApproveRequests: boolean;
+  /** Computador usado por várias pessoas: sai da conta logo após registrar o ponto. */
+  sharedComputer: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -14,6 +16,7 @@ export const DEFAULT_SETTINGS: Settings = {
   toleranceDailyMin: 10,
   toleranceLateMin: 5,
   autoApproveRequests: false,
+  sharedComputer: true,
 };
 
 export async function getSettings(q: Queryable): Promise<Settings> {

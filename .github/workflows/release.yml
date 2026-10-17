@@ -1,0 +1,35 @@
+name: Publicar versão para Windows
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: bash scripts/empacotar-windows.sh
+      - name: Publicar na página de downloads
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "Controle de Ponto $TAG" --notes-file .github/release-notes.md
+          gh release upload "$TAG" release/ControleDePonto-Windows.zip --clobber
+      - name: Guardar o pacote (execução manual)
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ControleDePonto-Windows
+          path: release/ControleDePonto-Windows.zip
